@@ -41,8 +41,8 @@ export const BACKWARDX = 4;
 export const BACKWARDY = 5;
 
 //  Type consts
-export const ISOSPRITE = 'isosprite';
-export const ISOARCADE = 'isoarcade';
+export const ISOSPRITE = 'IsoSprite';
+export const ISOARCADE = 'IsoArcade';
 
 /**
  * @class IsometricPlugin
@@ -58,8 +58,18 @@ export default class IsometricPlugin {
    * @param {Phaser.Scene} scene The current scene instance
    */
   constructor(scene) {
+    this.scene = scene;
+    this.systems = scene.sys;
+
+    if (!scene.sys.settings.isBooted) {
+      scene.sys.events.once('boot', this.boot, this);
+    }
+
     this.projector = new Projector(scene, scene.isometricType);
     scene.isometric = scene.isometric || this.projector;
+  }
+
+  boot() {
   }
 
   static register(PluginManager) {
@@ -67,6 +77,6 @@ export default class IsometricPlugin {
   }
 
   addIsoSprite(x, y, z, key, frame, group) {
-    return Phaser.GameObjectFactory.prototype.isoSprite.call(this.scene.add, x, y, z, key, frame, group);
+    return Phaser.GameObjects.GameObjectFactory.prototype.isoSprite(this.scene, x, y, z, key, frame, group);
   }
 }
