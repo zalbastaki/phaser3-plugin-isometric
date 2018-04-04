@@ -1,15 +1,4 @@
-**PLEASE NOTE, this plug-in is no longer in active development and compatibility with current versions of Phaser cannot be assured. This plug-in _has not_ been tested with Phaser 3!**
-
-Fork changelog
-==============
-[02.12.2015] - Fixes and utility functions courtesy of @[wassname](https://github.com/wassname/)
-
-[23.11.2015] - Fixed typo courtesy of @[wassname](https://github.com/wassname/)
-
-[02.04.2015] - Fix for Phaser 2.3 courtesy of @[mfpierre](https://github.com/mfpierre)
-
-[14.10.2014] - Added Typescript Support
-
+This is a **WIP** fork of [lewster32/phaser-plugin-isometric](https://github.com/lewster32/phaser-plugin-isometric) to make it work with Phaser 3.
 
 Phaser Isometric Plug-in
 =======================
@@ -23,9 +12,8 @@ Features
 
 * Familiar Phaser API - if you've grasped the basics of Phaser, you can use this!
 * 3D geometry helpers in the form of Point3 and Cube
-* Adjustable axonometric projection angle to allow for classic 2:1 pixel dimetric, true 120° isometric or any angle you like via ```game.iso.projectionAngle```
-* Simple x+y (with z fudging) and advanced cubic topological depth sorting
-* Arcade Physics derived 3D physics engine
-* Helpful debug utilities
-* Familiar factory methods added to GameObjectFactory and GameObjectCreator so you can do ```game.add.isoSprite```
-* Probably not many bugs!
+* Adjustable axonometric projection angle to allow for classic 2:1 pixel dimetric, true 120° isometric or any angle you like via ```scene.isometric.projectionAngle```
+* Simple x+y (with z fudging)
+* Arcade Physics derived 3D physics engine (**Not working yet!**)
+* Helpful debug utilities (**Not working yet!**)
+* Familiar factory methods added to GameObjectFactory and GameObjectCreator so you can do ```scene.add.isoSprite```
