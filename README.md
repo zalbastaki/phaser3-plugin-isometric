@@ -16,4 +16,4 @@ Also included is an Arcade-based 3D AABB physics engine, which again is closely 
 * Familiar factory methods added to GameObjectFactory and GameObjectCreator so you can do ```scene.add.isoSprite```
 
 ## Examples
-Check out the [docs](https://github.com/sebashwa/phaser3-plugin-isometric/tree/master/docs) folder and the [github-page](https://sebashwa.github.io/phaser3-plugin-isometric)
+Check out the [docs](https://github.com/sebashwa/phaser3-plugin-isometric/tree/master/docs) folder and the [github-page](https://sebashwa.github.io/phaser3-plugin-isometric/dist)
