@@ -1,6 +1,19 @@
 {
-  "name": "phaser-plugin-isometric",
-  "version": "0.9.4",
+  "name": "phaser3-plugin-isometric",
+  "description": "Feature-packed axonometric plugin for Phaser 3 which stays true to the Phaser API.",
+  "contributors": {
+    "email": "sebashwa@mailbox.org"
+  },
+  "keywords": [
+    "phaser",
+    "phaser3",
+    "phaser 3",
+    "isometric",
+    "plugin",
+    "axonometric"
+  ],
+  "license": "MIT",
+  "version": "0.0.1",
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.4",
@@ -8,6 +21,13 @@
     "eslint": "^4.19.1",
     "webpack": "^4.4.1",
     "webpack-cli": "^2.0.13"
+  },
+  "peerDependencies": {
+    "phaser": "3.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sebashwa/phaser-plugin-isometric.git"
   },
   "main": "dist/phaser-plugin-isometric.js"
 }
