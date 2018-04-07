@@ -7,7 +7,7 @@ class IsometricPluginExample extends Scene {
   }
 
   preload() {
-    this.load.image('cube', 'assets/cube.png');
+    this.load.image('cube', 'dist/assets/cube.png');
     this.load.plugin('IsometricPlugin', IsometricPlugin);
   }
 
