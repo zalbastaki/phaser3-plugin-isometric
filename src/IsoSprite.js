@@ -195,13 +195,9 @@ class IsoSprite extends Phaser.GameObjects.Sprite {
     this._isoBounds.widthY = Math.round(Math.abs(this.width) * 0.5) * asx;
     this._isoBounds.height = Math.round(Math.abs(this.height) - (Math.abs(this.width) * 0.5)) * asy;
 
-    // TODO: What do we have to calculate here?
-    // this._isoBounds.x = this.isoX + (this._isoBounds.widthX * -this.anchor.x) + this._isoBounds.widthX * 0.5;
-    // this._isoBounds.y = this.isoY + (this._isoBounds.widthY * this.anchor.x) - this._isoBounds.widthY * 0.5;
-    // this._isoBounds.z = this.isoZ - (Math.abs(this.height) * (1 - this.anchor.y)) + (Math.abs(this.width * 0.5));
-    this._isoBounds.x = this.isoX +  this._isoBounds.widthX * 0.5;
-    this._isoBounds.y = this.isoY +  this._isoBounds.widthY * 0.5;
-    this._isoBounds.z = this.isoZ - (Math.abs(this.height) * Math.abs(this.width * 0.5));
+    this._isoBounds.x = this.isoX + (this._isoBounds.widthX * -this.originX) + this._isoBounds.widthX * 0.5;
+    this._isoBounds.y = this.isoY + (this._isoBounds.widthY * this.originX) - this._isoBounds.widthY * 0.5;
+    this._isoBounds.z = this.isoZ - (Math.abs(this.height) * (1 - this.originY)) + (Math.abs(this.width * 0.5));
 
     return this._isoBounds;
   }
