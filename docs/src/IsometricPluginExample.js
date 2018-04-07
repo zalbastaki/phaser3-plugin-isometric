@@ -7,8 +7,8 @@ class IsometricPluginExample extends Scene {
   }
 
   preload() {
-    this.load.plugin('IsometricPlugin', IsometricPlugin);
     this.load.image('cube', 'assets/cube.png');
+    this.load.plugin('IsometricPlugin', IsometricPlugin);
   }
 
   create() {
@@ -48,4 +48,4 @@ class IsometricPluginExample extends Scene {
   }
 }
 
-export default new IsometricPluginExample();
+export default new IsometricPluginExample;

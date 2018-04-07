@@ -7,7 +7,7 @@ module.exports = {
   ],
   module: {
     rules: [
-      { test: /\.js$/, exclude: /(server|node_modules)/, loader: 'babel-loader' },
+      { test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader' },
       { test: [/\.vert$/, /\.frag$/], use: 'raw-loader' }
     ]
   },
@@ -24,6 +24,10 @@ module.exports = {
       WEBGL_RENDERER: true,
       CANVAS_RENDERER: true
     })
-  ]
+  ],
+  devServer: {
+    contentBase: __dirname + '/dist',
+    publicPath: '/'
+  },
 };
 
