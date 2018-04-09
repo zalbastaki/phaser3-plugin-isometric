@@ -311,66 +311,66 @@ class Octree {
  * @param {Octree} octree - The octree to render.
  * @param {string} color - The color of the lines in the quadtree.
  */
-Phaser.Utils.Debug.prototype.octree = function (octree, color) {
-  color = color || 'rgba(255,0,0,0.3)';
-
-  this.start();
-
-  var bounds = octree.bounds,
-    i, points;
-
-  if (octree.nodes.length === 0) {
-
-    this.context.strokeStyle = color;
-
-    var cube = new Cube(bounds.x, bounds.y, bounds.z, bounds.widthX, bounds.widthY, bounds.height);
-    var corners = cube.getCorners();
-
-    var posX = -this.game.camera.x;
-    var posY = -this.game.camera.y;
-
-    points = corners.slice(0, corners.length);
-
-    points = points.map(function (p) {
-      var newPos = this.game.iso.project(p);
-      newPos.x += posX;
-      newPos.y += posY;
-      return newPos;
-    });
-
-    this.context.moveTo(points[0].x, points[0].y);
-    this.context.beginPath();
-    this.context.strokeStyle = color;
-
-    this.context.lineTo(points[1].x, points[1].y);
-    this.context.lineTo(points[3].x, points[3].y);
-    this.context.lineTo(points[2].x, points[2].y);
-    this.context.lineTo(points[6].x, points[6].y);
-    this.context.lineTo(points[4].x, points[4].y);
-    this.context.lineTo(points[5].x, points[5].y);
-    this.context.lineTo(points[1].x, points[1].y);
-    this.context.lineTo(points[0].x, points[0].y);
-    this.context.lineTo(points[4].x, points[4].y);
-    this.context.moveTo(points[0].x, points[0].y);
-    this.context.lineTo(points[2].x, points[2].y);
-    this.context.moveTo(points[3].x, points[3].y);
-    this.context.lineTo(points[7].x, points[7].y);
-    this.context.lineTo(points[6].x, points[6].y);
-    this.context.moveTo(points[7].x, points[7].y);
-    this.context.lineTo(points[5].x, points[5].y);
-    this.context.stroke();
-    this.context.closePath();
-
-    for (i = 0; i < octree.objects.length; i++) {
-      this.body(octree.objects[i].sprite, 'rgb(0,255,0)', false);
-    }
-  } else {
-    for (i = 0; i < octree.nodes.length; i++) {
-      this.octree(octree.nodes[i]);
-    }
-  }
-
-  this.stop();
-};
+// Phaser.Utils.Debug.prototype.octree = function (octree, color) {
+//   color = color || 'rgba(255,0,0,0.3)';
+//
+//   this.start();
+//
+//   var bounds = octree.bounds,
+//     i, points;
+//
+//   if (octree.nodes.length === 0) {
+//
+//     this.context.strokeStyle = color;
+//
+//     var cube = new Cube(bounds.x, bounds.y, bounds.z, bounds.widthX, bounds.widthY, bounds.height);
+//     var corners = cube.getCorners();
+//
+//     var posX = -this.game.camera.x;
+//     var posY = -this.game.camera.y;
+//
+//     points = corners.slice(0, corners.length);
+//
+//     points = points.map(function (p) {
+//       var newPos = this.game.iso.project(p);
+//       newPos.x += posX;
+//       newPos.y += posY;
+//       return newPos;
+//     });
+//
+//     this.context.moveTo(points[0].x, points[0].y);
+//     this.context.beginPath();
+//     this.context.strokeStyle = color;
+//
+//     this.context.lineTo(points[1].x, points[1].y);
+//     this.context.lineTo(points[3].x, points[3].y);
+//     this.context.lineTo(points[2].x, points[2].y);
+//     this.context.lineTo(points[6].x, points[6].y);
+//     this.context.lineTo(points[4].x, points[4].y);
+//     this.context.lineTo(points[5].x, points[5].y);
+//     this.context.lineTo(points[1].x, points[1].y);
+//     this.context.lineTo(points[0].x, points[0].y);
+//     this.context.lineTo(points[4].x, points[4].y);
+//     this.context.moveTo(points[0].x, points[0].y);
+//     this.context.lineTo(points[2].x, points[2].y);
+//     this.context.moveTo(points[3].x, points[3].y);
+//     this.context.lineTo(points[7].x, points[7].y);
+//     this.context.lineTo(points[6].x, points[6].y);
+//     this.context.moveTo(points[7].x, points[7].y);
+//     this.context.lineTo(points[5].x, points[5].y);
+//     this.context.stroke();
+//     this.context.closePath();
+//
+//     for (i = 0; i < octree.objects.length; i++) {
+//       this.body(octree.objects[i].sprite, 'rgb(0,255,0)', false);
+//     }
+//   } else {
+//     for (i = 0; i < octree.nodes.length; i++) {
+//       this.octree(octree.nodes[i]);
+//     }
+//   }
+//
+//   this.stop();
+// };
 
 export default Octree;

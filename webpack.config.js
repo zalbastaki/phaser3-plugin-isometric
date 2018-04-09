@@ -1,7 +1,7 @@
 module.exports = {
   mode: 'development',
   entry: [
-    './src/index.js'
+    './src/IsoPlugin.js'
   ],
   module: {
     rules: [
