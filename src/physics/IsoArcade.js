@@ -47,12 +47,12 @@ export default class IsoArcade {
     };
 
     /**
-     * @property {number} maxObjects - Used by the QuadTree/Octree to set the maximum number of objects per quad.
+     * @property {number} maxObjects - Used by the Octree to set the maximum number of objects per quad.
      */
     this.maxObjects = 10;
 
     /**
-     * @property {number} maxLevels - Used by the QuadTree/Octree to set the maximum number of iteration levels.
+     * @property {number} maxLevels - Used by the Octree to set the maximum number of iteration levels.
      */
     this.maxLevels = 4;
 
@@ -67,19 +67,9 @@ export default class IsoArcade {
     this.forceXY = false;
 
     /**
-     * @property {boolean} skipTree - If true an Octree/QuadTree will never be used for any collision. Handy for tightly packed games. See also Body.skipTree.
+     * @property {boolean} skipTree - If true an Octree will never be used for any collision. Handy for tightly packed games. See also Body.skipTree.
      */
     this.skipTree = false;
-
-    /**
-     * @property {boolean} useQuadTree - If true, the collision/overlap routines will use a QuadTree, which will ignore the z position of objects when determining potential collisions. This will be faster if you don't do a lot of stuff on the z-axis.
-     */
-    this.useQuadTree = false;
-
-    /**
-     * @property {Phaser.QuadTree} quadTree - The world QuadTree.
-     */
-    this.quadTree = new Phaser.QuadTree(this.bounds.x, this.bounds.y, this.bounds.widthX, this.bounds.widthY, this.maxObjects, this.maxLevels);
 
     /**
      * @property {Octree} octree - The world Octree.
@@ -479,25 +469,14 @@ export default class IsoArcade {
         }
       }
     } else {
-      if (this.useQuadTree) {
-        //  What is the sprite colliding with in the quadTree?
-        this.quadTree.clear();
+      //  What is the sprite colliding with in the octree?
+      this.octree.clear();
 
-        this.quadTree.reset(this.bounds.x, this.bounds.y, this.bounds.widthX, this.bounds.widthY, this.maxObjects, this.maxLevels);
+      this.octree.reset(this.bounds.x, this.bounds.y, this.bounds.z, this.bounds.widthX, this.bounds.widthY, this.bounds.height, this.maxObjects, this.maxLevels);
 
-        this.quadTree.populate(group);
+      this.octree.populate(group);
 
-        this._potentials = this.quadTree.retrieve(sprite);
-      } else {
-        //  What is the sprite colliding with in the octree?
-        this.octree.clear();
-
-        this.octree.reset(this.bounds.x, this.bounds.y, this.bounds.z, this.bounds.widthX, this.bounds.widthY, this.bounds.height, this.maxObjects, this.maxLevels);
-
-        this.octree.populate(group);
-
-        this._potentials = this.octree.retrieve(sprite);
-      }
+      this._potentials = this.octree.retrieve(sprite);
 
       for (i = 0, len = this._potentials.length; i < len; i++) {
         //  We have our potential suspects, are they in this group?
