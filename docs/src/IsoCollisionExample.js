@@ -9,11 +9,10 @@ class IsoCollisionExample extends Scene {
     }
 
     super(sceneConfig);
-
   }
 
   preload() {
-    this.load.image('cube', '/dist/assets/cube.png');
+    this.load.image('cube', '../dist/assets/cube.png');
     this.load.plugin('IsoPlugin', IsoPlugin);
     this.load.plugin('IsoPhysics', IsoPhysics);
   }

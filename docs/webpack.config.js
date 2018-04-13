@@ -17,7 +17,7 @@ module.exports = {
   },
   output: {
     path: __dirname + '/dist',
-    publicPath: '/',
+    publicPath: '/phaser3-plugin-isometric/dist',
     filename: '[name].bundle.js'
   },
   plugins: [
