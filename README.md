@@ -11,7 +11,7 @@ Also included is an Arcade-based 3D AABB physics engine, which again is closely 
 * 3D geometry helpers in the form of Point3 and Cube
 * Adjustable axonometric projection angle to allow for classic 2:1 pixel dimetric, true 120° isometric or any angle you like via ```scene.isometric.projectionAngle```
 * Simple x+y (with z fudging)
-* Arcade Physics derived 3D physics engine (**Not working yet!**)
+* Arcade Physics derived 3D physics engine (**Working, but needs refactoring!**)
 * Helpful debug utilities (**Not working yet!**)
 * Familiar factory methods added to GameObjectFactory and GameObjectCreator so you can do ```scene.add.isoSprite```
 
