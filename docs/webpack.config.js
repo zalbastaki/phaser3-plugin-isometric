@@ -2,9 +2,10 @@ const webpack = require('webpack');
 
 module.exports = {
   mode: 'development',
-  entry: [
-    './src/index.js'
-  ],
+  entry: {
+    projection: './src/IsoProjectionExample.js',
+    collision: './src/IsoCollisionExample.js'
+  },
   module: {
     rules: [
       { test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader' },
@@ -17,7 +18,7 @@ module.exports = {
   output: {
     path: __dirname + '/dist',
     publicPath: '/',
-    filename: 'bundle.js'
+    filename: '[name].bundle.js'
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -29,5 +30,18 @@ module.exports = {
     contentBase: __dirname,
     publicPath: '/dist'
   },
+	optimization: {
+		splitChunks: {
+			cacheGroups: {
+				commons: {
+					name: "commons",
+					chunks: "initial",
+					minChunks: 2,
+					minSize: 0
+				}
+			}
+		},
+		occurrenceOrder: true 
+  }
 };
 

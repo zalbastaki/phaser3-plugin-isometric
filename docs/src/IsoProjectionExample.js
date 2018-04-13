@@ -1,21 +1,24 @@
-import Phaser, { Scene } from 'phaser';
-import IsometricPlugin from 'phaser3-plugin-isometric';
+import Phaser, { Scene, Game } from 'phaser';
+import IsoPlugin from 'phaser3-plugin-isometric';
 
-class IsometricPluginExample extends Scene {
+class IsoProjectionExample extends Scene {
   constructor() {
-    super({ key: 'IsometricPluginExample' });
+    super({
+      key: 'IsoProjectionExample',
+      mapAdd: { isoPlugin: 'iso' }
+    });
   }
 
   preload() {
-    this.load.image('cube', 'dist/assets/cube.png');
-    this.load.plugin('IsometricPlugin', IsometricPlugin);
+    this.load.image('cube', '/dist/assets/cube.png');
+    this.load.plugin('IsoPlugin', IsoPlugin);
   }
 
   create() {
-    this.sys.install('IsometricPlugin');
+    this.sys.install('IsoPlugin');
 
     // Set the anchor of the isometric projection to the mid top of the screen
-    this.isometric.anchor.setTo(0.5, 0.1)
+    this.iso.projector.anchor.setTo(0.5, 0.1)
 
     // Even though the children are added back to front, it is sorted the right way
     // because depth value is set on the IsoSprites and Phaser 3 sorts after that by default.
@@ -48,4 +51,12 @@ class IsometricPluginExample extends Scene {
   }
 }
 
-export default new IsometricPluginExample;
+let config = {
+  type: Phaser.AUTO,
+  width: 600,
+  height: 600,
+  pixelArt: true,
+  scene: IsoProjectionExample
+};
+
+new Game(config);
