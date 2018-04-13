@@ -1,25 +1,30 @@
+import Body from './Body';
 import Cube from '../Cube';
 import Point3 from '../Point3';
 import Octree from '../Octree';
-
-export const physicsElapsed = 1 / 60;
+import { ISOSPRITE } from '../IsoPlugin';
 
 /**
- * IsoArcade Physics constructor.
+ * IsoPhysics Physics constructor.
  *
- * @class IsoArcade
- * @classdesc IsoArcade Physics
+ * @class IsoPhysics
+ * @classdesc IsoPhysics Physics
  */
-export default class IsoArcade {
+export default class IsoPhysics {
   /**
    * @constructor
    * @param {Phaser.Scene} Reference to the current scene instance.
    */
-  constructor(scene) {
+  constructor(scene, projector) {
     /**
      * @property {Phaser.Scene} scene - Local reference to scene.
      */
     this.scene = scene;
+
+    /**
+     * @property {Projector} projector - Local reference to the current projector.
+     */
+    this.projector = projector;
 
     /**
      * @property {Point3} gravity - The World gravity setting. Defaults to x: 0, y: 0, z: 0 or no gravity.
@@ -189,7 +194,7 @@ export default class IsoArcade {
   }
 
   /**
-   * This will create an IsoArcade Physics body on the given game object or array of game objects.
+   * This will create an IsoPhysics Physics body on the given game object or array of game objects.
    * A game object can only have 1 physics body active at any one time, and it can't be changed until the object is destroyed.
    *
    * @method Arcade#enable
@@ -203,7 +208,7 @@ export default class IsoArcade {
       i = object.length;
 
       while (i--) {
-        if (object[i] instanceof Phaser.Group) {
+        if (object[i] instanceof Phaser.GameObjects.Group) {
           //  If it's a Group then we do it on the children regardless
           this.enable(object[i].children, children);
         } else {
@@ -215,7 +220,7 @@ export default class IsoArcade {
         }
       }
     } else {
-      if (object instanceof Phaser.Group) {
+      if (object instanceof Phaser.GameObjects.Group) {
         //  If it's a Group then we do it on the children regardless
         this.enable(object.children, children);
       } else {
@@ -229,7 +234,7 @@ export default class IsoArcade {
   }
 
   /**
-   * Creates an IsoArcade Physics body on the given game object.
+   * Creates an IsoPhysics Physics body on the given game object.
    * A game object can only have 1 physics body active at any one time, and it can't be changed until the body is nulled.
    *
    * @method Arcade#enableBody
@@ -247,14 +252,14 @@ export default class IsoArcade {
    * @method Arcade#updateMotion
    * @param {Body} body - The Body object to be updated.
    */
-  updateMotion(body) {
+  updateMotion(body, delta) {
     this._velocityDelta = this.computeVelocity(0, body, body.angularVelocity, body.angularAcceleration, body.angularDrag, body.maxAngular) - body.angularVelocity;
     body.angularVelocity += this._velocityDelta;
-    body.rotation += (body.angularVelocity * physicsElapsed);
+    body.rotation += (body.angularVelocity * delta);
 
-    body.velocity.x = this.computeVelocity(1, body, body.velocity.x, body.acceleration.x, body.drag.x, body.maxVelocity.x);
-    body.velocity.y = this.computeVelocity(2, body, body.velocity.y, body.acceleration.y, body.drag.y, body.maxVelocity.y);
-    body.velocity.z = this.computeVelocity(3, body, body.velocity.z, body.acceleration.z, body.drag.z, body.maxVelocity.z);
+    body.velocity.x = this.computeVelocity(1, body, body.velocity.x, body.acceleration.x, body.drag.x, body.maxVelocity.x, delta);
+    body.velocity.y = this.computeVelocity(2, body, body.velocity.y, body.acceleration.y, body.drag.y, body.maxVelocity.y, delta);
+    body.velocity.z = this.computeVelocity(3, body, body.velocity.z, body.acceleration.z, body.drag.z, body.maxVelocity.z, delta);
   }
 
   /**
@@ -270,21 +275,21 @@ export default class IsoArcade {
    * @param {number} [max=10000] - An absolute value cap for the velocity.
    * @return {number} The altered Velocity value.
    */
-  computeVelocity(axis, body, velocity, acceleration, drag, max) {
+  computeVelocity(axis, body, velocity, acceleration, drag, max, delta) {
     max = max || 10000;
 
     if (axis === 1 && body.allowGravity) {
-      velocity += (this.gravity.x + body.gravity.x) * physicsElapsed;
+      velocity += (this.gravity.x + body.gravity.x) * delta;
     } else if (axis === 2 && body.allowGravity) {
-      velocity += (this.gravity.y + body.gravity.y) * physicsElapsed;
+      velocity += (this.gravity.y + body.gravity.y) * delta;
     } else if (axis === 3 && body.allowGravity) {
-      velocity += (this.gravity.z + body.gravity.z) * physicsElapsed;
+      velocity += (this.gravity.z + body.gravity.z) * delta;
     }
 
     if (acceleration) {
-      velocity += acceleration * physicsElapsed;
+      velocity += acceleration * delta;
     } else if (drag) {
-      this._drag = drag * physicsElapsed;
+      this._drag = drag * delta;
 
       if (velocity - this._drag > 0) {
         velocity -= this._drag;
@@ -341,7 +346,7 @@ export default class IsoArcade {
   /**
    * Checks for collision between two game objects. You can perform IsoSprite vs. IsoSprite, IsoSprite vs. Group or Group vs. Group collisions.
    * The second parameter can be an array of objects, of differing types.
-   * The objects are also automatically separated. If you don't require separation then use IsoArcade.overlap instead.
+   * The objects are also automatically separated. If you don't require separation then use IsoPhysics.overlap instead.
    * An optional processCallback can be provided. If given this function will be called when two sprites are found to be colliding. It is called before any separation takes place,
    * giving you the chance to perform additional checks. If the function returns true then the collision and separation is carried out. If it returns false it is skipped.
    * The collideCallback is an optional function that is only called if two sprites collide. If a processCallback has been set then it needs to return true for collideCallback to be called.
@@ -394,7 +399,7 @@ export default class IsoArcade {
       return;
     }
 
-    if (object1 && object2 && object1.exists && object2.exists) {
+    if (object1 && object2) {
       //  ISOSPRITES
       if (object1.type === ISOSPRITE) {
         if (object2.type === ISOSPRITE) {
@@ -464,7 +469,7 @@ export default class IsoArcade {
 
     if (sprite.body.skipTree || this.skipTree) {
       for (i = 0, len = group.children.length; i < len; i++) {
-        if (group.children[i] && group.children[i].exists) {
+        if (group.children[i]) {
           this.collideSpriteVsSprite(sprite, group.children[i], collideCallback, processCallback, callbackContext, overlapOnly);
         }
       }
@@ -512,7 +517,7 @@ export default class IsoArcade {
 
     for (var i = 0; i < len; i++) {
       for (var j = i + 1; j <= len; j++) {
-        if (group.children[i] && group.children[j] && group.children[i].exists && group.children[j].exists) {
+        if (group.children[i] && group.children[j]) {
           this.collideSpriteVsSprite(group.children[i], group.children[j], collideCallback, processCallback, callbackContext, overlapOnly);
         }
       }
@@ -537,9 +542,7 @@ export default class IsoArcade {
     }
 
     for (var i = 0, len = group1.children.length; i < len; i++) {
-      if (group1.children[i].exists) {
-        this.collideSpriteVsGroup(group1.children[i], group2, collideCallback, processCallback, callbackContext, overlapOnly);
-      }
+      this.collideSpriteVsGroup(group1.children[i], group2, collideCallback, processCallback, callbackContext, overlapOnly);
     }
   }
 
@@ -976,7 +979,7 @@ export default class IsoArcade {
    */
   distanceToPointer(displayObjectBody, pointer) {
     pointer = pointer || this.scene.input.activePointer;
-    var isoPointer = this.scene.isometric.projector.unproject(pointer.position, undefined, displayObjectBody.z);
+    var isoPointer = this.projector.unproject(pointer.position, undefined, displayObjectBody.z);
     isoPointer.z = displayObjectBody.z;
     var a = this.anglesToXYZ(displayObjectBody, isoPointer.x, isoPointer.y, isoPointer.z);
 
@@ -1013,7 +1016,7 @@ export default class IsoArcade {
    */
   angleToPointer(displayObjectBody, pointer) {
     pointer = pointer || this.scene.input.activePointer;
-    var isoPointer = this.scene.isometric.projector.unproject(pointer.position, undefined, displayObjectBody.z);
+    var isoPointer = this.projector.unproject(pointer.position, undefined, displayObjectBody.z);
     isoPointer.z = displayObjectBody.z;
     var a = this.anglesToXYZ(displayObjectBody, isoPointer.x, isoPointer.y, isoPointer.z);
 
@@ -1170,8 +1173,42 @@ export default class IsoArcade {
     return a.theta;
   }
 
+  preUpdate(time, delta) {
+    const children = this.scene.children.list;
+    const len = children.length;
+
+    for (var i = 0; i < len; i++) {
+      const child = children[i];
+      if (!child.body) { return; }
+
+      child.body.preUpdate(time, delta);
+    }
+  }
+
+  postUpdate() {
+    const children = this.scene.children.list;
+    const len = children.length;
+
+    for (var i = 0; i < len; i++) {
+      const child = children[i];
+      if (!child.body) { return; }
+
+      const others = Object.assign([], children);
+      others.splice(i, 1);
+      this.collide(child, others);
+      child.body.postUpdate();
+    }
+  }
+
+  boot() {
+    const eventEmitter = this.scene.sys.events;
+
+    eventEmitter.on('preupdate', this.preUpdate, this);
+    eventEmitter.on('postupdate', this.postUpdate, this);
+  }
+
   static register(PluginManager) {
-    PluginManager.register('IsoArcadePhysics', IsoArcade, 'isoArcadePhysics');
+    PluginManager.register('IsoPhysics', IsoPhysics, 'isoPhysics');
   }
 }
 
@@ -1179,7 +1216,7 @@ export default class IsoArcade {
 // Phaser.Physics.prototype.parseConfig = (function (_super) {
 //
 //     return function () {
-//         if (this.config.hasOwnProperty('isoArcade') && this.config['isoArcade'] === true && hasOwnProperty('IsoArcade')) {
+//         if (this.config.hasOwnProperty('isoArcade') && this.config['isoArcade'] === true && hasOwnProperty('IsoPhysics')) {
 //             this.isoArcade = new Phaser.Plugin.Isometric(this.game, this.config);
 //         }
 //         return _super.call(this);

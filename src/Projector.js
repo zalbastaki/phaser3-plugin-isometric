@@ -46,7 +46,7 @@ class Projector {
      * @property {Phaser.Point} anchor - The x and y offset multipliers as a ratio of the game world size.
      * @default
      */
-    this.anchor = new Phaser.Geom.Point(0.5, 0);
+    this.anchor = new Phaser.Geom.Point(0.5, 0.5);
   }
 
   /**

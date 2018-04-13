@@ -1,8 +1,7 @@
 import Point3 from '../Point3';
 import Cube from '../Cube';
-import { physicsElapsed } from './IsoArcade';
 import {
-  ISOARCADE,
+  ISOPHYSICS,
   BACKWARDX,
   BACKWARDY,
   FORWARDX,
@@ -37,7 +36,7 @@ export default class Body {
     /**
      * @property {number} type - The type of physics system this body belongs to.
      */
-    this.type = ISOARCADE;
+    this.type = ISOPHYSICS;
 
     /**
      * @property {boolean} enable - A disabled body won't be checked for any form of collision or overlap or have its pre/post updates run.
@@ -83,19 +82,19 @@ export default class Body {
      * @property {number} sourceWidthX - The un-scaled original size.
      * @readonly
      */
-    this.sourceWidthX = sprite.texture.frame.width;
+    this.sourceWidthX = sprite.width / sprite.scaleX;
 
     /**
      * @property {number} sourceWidthY - The un-scaled original size.
      * @readonly
      */
-    this.sourceWidthY = sprite.texture.frame.width;
+    this.sourceWidthY = sprite.width / sprite.scaleX;
 
     /**
      * @property {number} sourceHeight - The un-scaled original size.
      * @readonly
      */
-    this.sourceHeight = sprite.texture.frame.height;
+    this.sourceHeight = sprite.height / sprite.scaleY;
 
     /**
      * @property {number} widthX - The calculated X width (breadth) of the physics body.
@@ -376,13 +375,13 @@ export default class Body {
      * @property {number} _sx - Internal cache var.
      * @private
      */
-    this._sx = sprite.scale.x;
+    this._sx = sprite.scaleX;
 
     /**
      * @property {number} _sy - Internal cache var.
      * @private
      */
-    this._sy = sprite.scale.y;
+    this._sy = sprite.scaleY;
 
     /**
      * @property {number} _dx - Internal cache var.
@@ -424,16 +423,16 @@ export default class Body {
    * @protected
    */
   updateBounds() {
-    var asx = Math.abs(this.sprite.scale.x);
-    var asy = Math.abs(this.sprite.scale.y);
+    var asx = Math.abs(this.sprite.scaleX);
+    var asy = Math.abs(this.sprite.scaleY);
 
     if (asx !== this._sx || asy !== this._sy) {
       this.widthX = Math.ceil(this.sprite.width * 0.5);
       this.widthY = Math.ceil(this.sprite.width * 0.5);
       this.height = Math.ceil(this.sprite.height - (this.sprite.width * 0.5));
-      this.halfWidthX = Math.floor(this.widthX * 2);
-      this.halfWidthY = Math.floor(this.widthY * 2);
-      this.halfHeight = Math.floor(this.height * 2);
+      this.halfWidthX = Math.floor(this.widthX * 0.5);
+      this.halfWidthY = Math.floor(this.widthY * 0.5);
+      this.halfHeight = Math.floor(this.height * 0.5);
       this._sx = asx;
       this._sy = asy;
       this.center.setTo(this.position.x + this.halfWidthX, this.position.y + this.halfWidthY, this.position.z + this.halfHeight);
@@ -448,7 +447,7 @@ export default class Body {
    * @method Body#preUpdate
    * @protected
    */
-  preUpdate() {
+  preUpdate(time, delta) {
     if (!this.enable) { return; }
 
     this.phase = 1;
@@ -482,9 +481,9 @@ export default class Body {
     this.updateBounds();
 
     //  Working out how to incorporate anchors into this was... fun.
-    this.position.x = this.sprite.isoX + ((this.widthX * -this.sprite.anchor.x) + this.widthX * 0.5) + this.offset.x;
-    this.position.y = this.sprite.isoY + ((this.widthY * this.sprite.anchor.x) - this.widthY * 0.5) + this.offset.y;
-    this.position.z = this.sprite.isoZ - (Math.abs(this.sprite.height) * (1 - this.sprite.anchor.y)) + (Math.abs(this.sprite.width * 0.5)) + this.offset.z;
+    this.position.x = this.sprite.isoX + ((this.widthX * -this.sprite.originX) + this.widthX * 0.5) + this.offset.x;
+    this.position.y = this.sprite.isoY + ((this.widthY * this.sprite.originX) - this.widthY * 0.5) + this.offset.y;
+    this.position.z = this.sprite.isoZ - (Math.abs(this.sprite.height) * (1 - this.sprite.originY)) + (Math.abs(this.sprite.width * 0.5)) + this.offset.z;
 
 
     this.rotation = this.sprite.angle;
@@ -498,9 +497,10 @@ export default class Body {
     }
 
     if (this.moves) {
-      this.scene.physics.isoArcade.updateMotion(this);
+      delta /= 1000;
+      this.scene.isoPhysics.updateMotion(this, delta);
 
-      this.newVelocity.set(this.velocity.x * physicsElapsed, this.velocity.y * physicsElapsed, this.velocity.z * physicsElapsed);
+      this.newVelocity.set(this.velocity.x * delta, this.velocity.y * delta, this.velocity.z * delta);
 
       this.position.x += this.newVelocity.x;
       this.position.y += this.newVelocity.y;
@@ -518,7 +518,7 @@ export default class Body {
         this.checkWorldBounds();
       }
 
-      if (this.sprite.outOfBoundsKill && !this.scene.physics.isoArcade.bounds.intersects(this.sprite.isoBounds)){
+      if (this.sprite.outOfBoundsKill && !this.scene.isoPhysics.bounds.intersects(this.sprite.isoBounds)){
         this.sprite.kill();
       }
     }
@@ -537,7 +537,6 @@ export default class Body {
    * @protected
    */
   postUpdate() {
-
     //  Only allow postUpdate to be called once per frame
     if (!this.enable || this.phase === 2) { return; }
 
@@ -633,32 +632,32 @@ export default class Body {
    * @protected
    */
   checkWorldBounds() {
-    if (this.position.x < this.scene.physics.isoArcade.bounds.x && this.scene.physics.isoArcade.checkCollision.backX) {
-      this.position.x = this.scene.physics.isoArcade.bounds.x;
+    if (this.position.x < this.scene.isoPhysics.bounds.x && this.scene.isoPhysics.checkCollision.backX) {
+      this.position.x = this.scene.isoPhysics.bounds.x;
       this.velocity.x *= -this.bounce.x;
       this.blocked.backX = true;
-    } else if (this.frontX > this.scene.physics.isoArcade.bounds.frontX && this.scene.physics.isoArcade.checkCollision.frontX) {
-      this.position.x = this.scene.physics.isoArcade.bounds.frontX - this.widthX;
+    } else if (this.frontX > this.scene.isoPhysics.bounds.frontX && this.scene.isoPhysics.checkCollision.frontX) {
+      this.position.x = this.scene.isoPhysics.bounds.frontX - this.widthX;
       this.velocity.x *= -this.bounce.x;
       this.blocked.frontX = true;
     }
 
-    if (this.position.y < this.scene.physics.isoArcade.bounds.y && this.scene.physics.isoArcade.checkCollision.backY) {
-      this.position.y = this.scene.physics.isoArcade.bounds.y;
+    if (this.position.y < this.scene.isoPhysics.bounds.y && this.scene.isoPhysics.checkCollision.backY) {
+      this.position.y = this.scene.isoPhysics.bounds.y;
       this.velocity.y *= -this.bounce.y;
       this.blocked.backY = true;
-    } else if (this.frontY > this.scene.physics.isoArcade.bounds.frontY && this.scene.physics.isoArcade.checkCollision.frontY) {
-      this.position.y = this.scene.physics.isoArcade.bounds.frontY - this.widthY;
+    } else if (this.frontY > this.scene.isoPhysics.bounds.frontY && this.scene.isoPhysics.checkCollision.frontY) {
+      this.position.y = this.scene.isoPhysics.bounds.frontY - this.widthY;
       this.velocity.y *= -this.bounce.y;
       this.blocked.frontY = true;
     }
 
-    if (this.position.z < this.scene.physics.isoArcade.bounds.z && this.scene.physics.isoArcade.checkCollision.down) {
-      this.position.z = this.scene.physics.isoArcade.bounds.z;
+    if (this.position.z < this.scene.isoPhysics.bounds.z && this.scene.isoPhysics.checkCollision.down) {
+      this.position.z = this.scene.isoPhysics.bounds.z;
       this.velocity.z *= -this.bounce.z;
       this.blocked.down = true;
-    } else if (this.top > this.scene.physics.isoArcade.bounds.top && this.scene.physics.isoArcade.checkCollision.up) {
-      this.position.z = this.scene.physics.isoArcade.bounds.top - this.height;
+    } else if (this.top > this.scene.isoPhysics.bounds.top && this.scene.isoPhysics.checkCollision.up) {
+      this.position.z = this.scene.isoPhysics.bounds.top - this.height;
       this.velocity.z *= -this.bounce.z;
       this.blocked.up = true;
     }
@@ -728,8 +727,8 @@ export default class Body {
     this.rotation = this.sprite.angle;
     this.preRotation = this.rotation;
 
-    this._sx = this.sprite.scale.x;
-    this._sy = this.sprite.scale.y;
+    this._sx = this.sprite.scaleX;
+    this._sy = this.sprite.scaleY;
 
     this.center.setTo(this.position.x + this.halfWidthX, this.position.y + this.halfWidthY, this.position.z + this.halfHeight);
 
@@ -946,22 +945,23 @@ export default class Body {
     this.position.z = value;
   }
 
-  static render(context, body, color = 'rgba(0,255,0,0.4)', filled = true) {
+  debugRender(context, color = 'rgba(0,255,0,0.4)', filled = true) {
     var points = [];
-    var corners = body.getCorners();
+    var corners = this.getCorners();
 
-    var posX = -body.sprite.game.camera.x;
-    var posY = -body.sprite.game.camera.y;
+    var posX = -this.scene.cameras.main.x;
+    var posY = -this.scene.cameras.main.y;
 
     if (filled) {
       points = [corners[1], corners[3], corners[2], corners[6], corners[4], corners[5], corners[1]];
 
-      points = points.map(function (p) {
-        var newPos = body.sprite.game.iso.project(p);
+      points = points.map(p => {
+        var newPos = this.scene.iso.projector.project(p);
         newPos.x += posX;
         newPos.y += posY;
         return newPos;
       });
+
       context.beginPath();
       context.fillStyle = color;
       context.moveTo(points[0].x, points[0].y);
@@ -969,11 +969,12 @@ export default class Body {
       for (var i = 1; i < points.length; i++) {
         context.lineTo(points[i].x, points[i].y);
       }
+
       context.fill();
     } else {
       points = corners.slice(0, corners.length);
-      points = points.map(function (p) {
-        var newPos = body.sprite.game.iso.project(p);
+      points = points.map(p => {
+        var newPos = this.scene.iso.projector.project(p);
         newPos.x += posX;
         newPos.y += posY;
         return newPos;
@@ -1029,7 +1030,7 @@ export default class Body {
 // Phaser.Utils.Debug.prototype.body = (function (_super) {
 //
 //     return function (sprite, color, filled, depth) {
-//         if (sprite.body && sprite.body.type === ISOARCADE) {
+//         if (sprite.body && sprite.body.type === ISOPHYSICS) {
 //             this.start();
 //             Body.render(this.context, sprite.body, color, filled);
 //             if (depth) {
@@ -1046,7 +1047,7 @@ export default class Body {
 // Phaser.Utils.Debug.prototype.bodyInfo = (function (_super) {
 //
 //     return function (sprite, x, y, color) {
-//         if (sprite.body && sprite.body.type === ISOARCADE) {
+//         if (sprite.body && sprite.body.type === ISOPHYSICS) {
 //             this.start(x, y, color, 210);
 //             Body.renderBodyInfo(this, sprite.body);
 //             this.stop();

@@ -30,7 +30,7 @@
 
 import Projector from './Projector';
 import IsoSprite from './IsoSprite';
-import IsoArcade from './physics/IsoArcade';
+export { default as IsoPhysics } from './physics/IsoPhysics';
 
 export const VERSION = '0.9.3';
 
@@ -44,7 +44,7 @@ export const BACKWARDY = 5;
 
 //  Type consts
 export const ISOSPRITE = 'IsoSprite';
-export const ISOARCADE = 'IsoArcade';
+export const ISOPHYSICS = 'IsoPhysics';
 
 /**
  * @class IsometricPlugin
@@ -68,7 +68,6 @@ export default class IsoPlugin {
     }
 
     this.projector = new Projector(scene, scene.isometricType);
-    this.physics = new IsoArcade(scene);
 
     /**
      * Create a new IsoSprite with specific position and sprite sheet key.
@@ -116,6 +115,6 @@ export default class IsoPlugin {
   }
 
   static register(PluginManager) {
-    PluginManager.register('IsoPlugin', IsoPlugin, 'iso');
+    PluginManager.register('IsoPlugin', IsoPlugin, 'isoPlugin');
   }
 }

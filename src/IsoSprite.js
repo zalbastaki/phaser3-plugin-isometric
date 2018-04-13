@@ -11,7 +11,7 @@ import Cube from './Cube';
 * IsoSprites are simply Sprites that have three new position properties (isoX, isoY and isoZ) and ask the instance of Projector what their position should be in a 2D scene whenever these properties are changed.
 * The IsoSprites retain their 2D position property to prevent any problems and allow you to interact with them as you would a normal Sprite. The upside of this simplicity is that things should behave predictably for those already used to Phaser.
 */
-class IsoSprite extends Phaser.GameObjects.Sprite {
+export default class IsoSprite extends Phaser.GameObjects.Sprite {
   /**
    * @constructor
    * @extends Phaser.GameObjects.Sprite
@@ -156,7 +156,9 @@ class IsoSprite extends Phaser.GameObjects.Sprite {
    */
   _project() {
     if (this._isoPositionChanged) {
-      const { x, y } = this.scene.isometric.projector.project(this._isoPosition, this.position);
+      const pluginKey = this.scene.sys.settings.map.isoPlugin;
+      const sceneProjector = this.scene[pluginKey].projector;
+      const { x, y } = sceneProjector.project(this._isoPosition);
 
       this.x = x;
       this.y = y;
@@ -172,7 +174,7 @@ class IsoSprite extends Phaser.GameObjects.Sprite {
   }
 
   /**
-   * Internal function called by the World preUpdate cycle.
+   * Internal function called by the World update cycle.
    *
    * @method IsoSprite#preUpdate
    * @memberof IsoSprite
