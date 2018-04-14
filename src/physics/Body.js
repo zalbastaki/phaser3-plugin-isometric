@@ -1,14 +1,13 @@
 import Point3 from '../Point3';
 import Cube from '../Cube';
-import {
-  ISOPHYSICS,
-  BACKWARDX,
-  BACKWARDY,
-  FORWARDX,
-  FORWARDY,
-  UP,
-  DOWN
-} from '../IsoPlugin';
+
+const UP = 0;
+const DOWN = 1;
+const FORWARDX = 2;
+const FORWARDY = 3;
+const BACKWARDX = 4;
+const BACKWARDY = 5;
+const ISOPHYSICS = 'IsoPhysics';
 
 /**
  * @class Isometric.Body

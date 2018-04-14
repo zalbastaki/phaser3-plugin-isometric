@@ -12,9 +12,6 @@ module.exports = {
       { test: [/\.vert$/, /\.frag$/], use: 'raw-loader' }
     ]
   },
-  externals: {
-    Phaser: 'phaser'
-  },
   output: {
     path: __dirname + '/dist',
     publicPath: '/phaser3-plugin-isometric/dist',
@@ -30,18 +27,18 @@ module.exports = {
     contentBase: __dirname,
     publicPath: '/dist'
   },
-	optimization: {
-		splitChunks: {
-			cacheGroups: {
-				commons: {
-					name: "commons",
-					chunks: "initial",
-					minChunks: 2,
-					minSize: 0
-				}
-			}
-		},
-		occurrenceOrder: true 
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        commons: {
+          name: 'commons',
+          chunks: 'initial',
+          minChunks: 2,
+          minSize: 0
+        }
+      }
+    },
+    occurrenceOrder: true 
   }
 };
 

@@ -32,19 +32,7 @@ import Projector from './Projector';
 import IsoSprite from './IsoSprite';
 export { default as IsoPhysics } from './physics/IsoPhysics';
 
-export const VERSION = '0.9.3';
-
-// Directional consts
-export const UP = 0;
-export const DOWN = 1;
-export const FORWARDX = 2;
-export const FORWARDY = 3;
-export const BACKWARDX = 4;
-export const BACKWARDY = 5;
-
 //  Type consts
-export const ISOSPRITE = 'IsoSprite';
-export const ISOPHYSICS = 'IsoPhysics';
 
 /**
  * @class IsometricPlugin

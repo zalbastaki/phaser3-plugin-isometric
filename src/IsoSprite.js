@@ -1,6 +1,8 @@
-import { ISOSPRITE } from './IsoPlugin';
 import Point3 from './Point3';
 import Cube from './Cube';
+
+export const ISOSPRITE = 'IsoSprite';
+const Sprite = Phaser.GameObjects.Sprite;
 
 /**
 * @class IsoSprite
@@ -11,15 +13,15 @@ import Cube from './Cube';
 * IsoSprites are simply Sprites that have three new position properties (isoX, isoY and isoZ) and ask the instance of Projector what their position should be in a 2D scene whenever these properties are changed.
 * The IsoSprites retain their 2D position property to prevent any problems and allow you to interact with them as you would a normal Sprite. The upside of this simplicity is that things should behave predictably for those already used to Phaser.
 */
-export default class IsoSprite extends Phaser.GameObjects.Sprite {
+export default class IsoSprite extends Sprite {
   /**
    * @constructor
    * @extends Phaser.GameObjects.Sprite
-   * @param {Phaser.Game} game - A reference to the currently running game.
+   * @param {Phaser.Scene} scene - A reference to the current scene.
    * @param {number} x - The x coordinate (in 3D space) to position the IsoSprite at.
    * @param {number} y - The y coordinate (in 3D space) to position the IsoSprite at.
    * @param {number} z - The z coordinate (in 3D space) to position the IsoSprite at.
-   * @param {string|Phaser.RenderTexture|Phaser.BitmapData|PIXI.Texture} key - This is the image or texture used by the IsoSprite during rendering. It can be a string which is a reference to the Cache entry, or an instance of a RenderTexture or PIXI.Texture.
+   * @param {string|Phaser.RenderTexture|Phaser.BitmapData} key - This is the image or texture used by the IsoSprite during rendering. It can be a string which is a reference to the Cache entry, or an instance of a RenderTexture or PIXI.Texture.
    * @param {string|number} frame - If this IsoSprite is using part of a sprite sheet or texture atlas you can specify the exact frame to use by giving a string or numeric index.
    */
   constructor(scene, x, y, z, texture, frame) {
@@ -180,7 +182,7 @@ export default class IsoSprite extends Phaser.GameObjects.Sprite {
    * @memberof IsoSprite
    */
   preUpdate() {
-    Phaser.GameObjects.Sprite.prototype.preUpdate.call(this);
+    Sprite.prototype.preUpdate.call(this);
 
     this._project();
   }

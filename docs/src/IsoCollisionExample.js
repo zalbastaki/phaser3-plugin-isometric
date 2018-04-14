@@ -6,7 +6,7 @@ class IsoCollisionExample extends Scene {
     const sceneConfig = {
       key: 'IsoCollisionExample',
       mapAdd: { isoPlugin: 'iso', isoPhysics: 'isoPhysics' }
-    }
+    };
 
     super(sceneConfig);
   }
@@ -52,8 +52,8 @@ class IsoCollisionExample extends Scene {
         cube.body.bounce.set(1, 1, 0.2);
 
         // Send the cubes off in random x and y directions! Wheee!
-        const randomX = Math.trunc((Math.random() * 100 - 50))
-        const randomY = Math.trunc((Math.random() * 100 - 50))
+        const randomX = Math.trunc((Math.random() * 100 - 50));
+        const randomY = Math.trunc((Math.random() * 100 - 50));
         cube.body.velocity.setTo(randomX, randomY, 0);
       }
     }

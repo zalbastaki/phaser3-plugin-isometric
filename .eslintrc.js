@@ -1,15 +1,16 @@
 module.exports = {
     "env": {
         "browser": true,
+        "node": true,
         "commonjs": true,
         "es6": true
-    },
-    "ecmaFeatures": {
-      "classes": true
     },
     "extends": "eslint:recommended",
     "parserOptions": {
         "sourceType": "module"
+    },
+    "globals": {
+      "Phaser": false
     },
     "rules": {
         "indent": [

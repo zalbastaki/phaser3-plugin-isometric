@@ -2,7 +2,9 @@ import Body from './Body';
 import Cube from '../Cube';
 import Point3 from '../Point3';
 import Octree from '../Octree';
-import { ISOSPRITE } from '../IsoPlugin';
+import { ISOSPRITE } from '../IsoSprite';
+
+const { GROUP, GameObjects } = Phaser;
 
 /**
  * IsoPhysics Physics constructor.
@@ -189,7 +191,7 @@ export default class IsoPhysics {
    * @method Arcade#setBoundsToWorld
    */
   setBoundsToWorld() {
-    const { width, height } = scene.sys.game.config;
+    const { width, height } = this.scene.sys.game.config;
     this.bounds.setTo(0, 0, 0, width * 0.5, width * 0.5, height);
   }
 
@@ -208,7 +210,7 @@ export default class IsoPhysics {
       i = object.length;
 
       while (i--) {
-        if (object[i] instanceof Phaser.GameObjects.Group) {
+        if (object[i] instanceof GameObjects.Group) {
           //  If it's a Group then we do it on the children regardless
           this.enable(object[i].children, children);
         } else {
@@ -220,7 +222,7 @@ export default class IsoPhysics {
         }
       }
     } else {
-      if (object instanceof Phaser.GameObjects.Group) {
+      if (object instanceof GameObjects.Group) {
         //  If it's a Group then we do it on the children regardless
         this.enable(object.children, children);
       } else {
@@ -394,7 +396,7 @@ export default class IsoPhysics {
    */
   collideHandler(object1, object2, collideCallback, processCallback, callbackContext, overlapOnly) {
     //  Only collide valid objects
-    if (!object2 && object1.type === Phaser.GROUP) {
+    if (!object2 && object1.type === GROUP) {
       this.collideGroupVsSelf(object1, collideCallback, processCallback, callbackContext, overlapOnly);
       return;
     }
@@ -404,15 +406,15 @@ export default class IsoPhysics {
       if (object1.type === ISOSPRITE) {
         if (object2.type === ISOSPRITE) {
           this.collideSpriteVsSprite(object1, object2, collideCallback, processCallback, callbackContext, overlapOnly);
-        } else if (object2.type === Phaser.GROUP) {
+        } else if (object2.type === GROUP) {
           this.collideSpriteVsGroup(object1, object2, collideCallback, processCallback, callbackContext, overlapOnly);
         }
       }
       //  GROUPS
-      else if (object1.type === Phaser.GROUP) {
+      else if (object1.type === GROUP) {
         if (object2.type === ISOSPRITE) {
           this.collideSpriteVsGroup(object2, object1, collideCallback, processCallback, callbackContext, overlapOnly);
-        } else if (object2.type === Phaser.GROUP) {
+        } else if (object2.type === GROUP) {
           this.collideGroupVsGroup(object1, object2, collideCallback, processCallback, callbackContext, overlapOnly);
         }
       }
@@ -1034,10 +1036,9 @@ export default class IsoPhysics {
    * @param {Phaser.Point|object} [point] - The Point object in which the x and y properties will be set to the calculated velocity.
    * @return {Point3} - A Point where point.x contains the velocity x value and so on for y and z.
    */
-  velocityFromAngles(theta, phi, speed, point) {
+  velocityFromAngles(theta, phi, speed) {
     if (phi === undefined) { phi = Math.sin(Math.PI/2); }
     if (speed === undefined) { speed = 60; }
-    point = point || new Phaser.Point();
 
     return new Point3(
       Math.cos(theta) * Math.sin(phi) * speed,

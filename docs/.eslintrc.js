@@ -4,9 +4,6 @@ module.exports = {
         "es6": true,
         "node": true
     },
-    "ecmaFeatures": {
-      "classes": true
-    }
     "extends": "eslint:recommended",
     "parserOptions": {
         "sourceType": "module"
