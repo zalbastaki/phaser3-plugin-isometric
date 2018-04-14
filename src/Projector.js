@@ -44,10 +44,10 @@ class Projector {
     this.projectionAngle = projectionAngle || CLASSIC;
 
     /**
-     * @property {Phaser.Geom.Point} anchor - The x and y offset multipliers as a ratio of the game world size.
+     * @property {Phaser.Geom.Point} origin - The x and y offset multipliers as a ratio of the game world size.
      * @default
      */
-    this.anchor = new Point(0.5, 0.5);
+    this.origin = new Point(0.5, 0.5);
   }
 
   /**
@@ -77,8 +77,8 @@ class Projector {
     out.y = ((point3.x + point3.y) * this._transform[1]) - point3.z;
 
     const { width, height } = this.scene.sys.game.config;
-    out.x += width * this.anchor.x;
-    out.y += height * this.anchor.y;
+    out.x += width * this.origin.x;
+    out.y += height * this.origin.y;
 
     return out;
   }
@@ -94,8 +94,8 @@ class Projector {
     out.x = (point3.x - point3.y) * this._transform[0];
     out.y = (point3.x + point3.y) * this._transform[1];
 
-    out.x += this.game.world.width * this.anchor.x;
-    out.y += this.game.world.height * this.anchor.y;
+    out.x += this.game.world.width * this.origin.x;
+    out.y += this.game.world.height * this.origin.y;
 
     return out;
   }
@@ -109,8 +109,8 @@ class Projector {
    * @return {Point3} The transformed Point3.
    */
   unproject(point, out = new Point3(), z = 0) {
-    const x = point.x - this.game.world.x - (this.game.world.width * this.anchor.x);
-    const y = point.y - this.game.world.y - (this.game.world.height * this.anchor.y) + z;
+    const x = point.x - this.game.world.x - (this.game.world.width * this.origin.x);
+    const y = point.y - this.game.world.y - (this.game.world.height * this.origin.y) + z;
 
     out.x = x / (2 * this._transform[0]) + y / (2 * this._transform[1]);
     out.y = -(x / (2 * this._transform[0])) + y / (2 * this._transform[1]);
