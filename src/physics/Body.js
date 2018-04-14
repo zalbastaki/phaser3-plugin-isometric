@@ -7,7 +7,7 @@ const FORWARDX = 2;
 const FORWARDY = 3;
 const BACKWARDX = 4;
 const BACKWARDY = 5;
-const ISOPHYSICS = 'IsoPhysics';
+export const TYPE = 'IsoPhysics';
 
 /**
  * @class Isometric.Body
@@ -35,7 +35,7 @@ export default class Body {
     /**
      * @property {number} type - The type of physics system this body belongs to.
      */
-    this.type = ISOPHYSICS;
+    this.type = TYPE;
 
     /**
      * @property {boolean} enable - A disabled body won't be checked for any form of collision or overlap or have its pre/post updates run.
@@ -355,7 +355,7 @@ export default class Body {
     };
 
     /**
-     * @property {number} phase - Is this Body in a preUpdate (1) or postUpdate (2) state?
+     * @property {number} phase - Is this Body in a update (1) or postUpdate (2) state?
      */
     this.phase = 0;
 
@@ -443,10 +443,10 @@ export default class Body {
   /**
    * Internal method.
    *
-   * @method Body#preUpdate
+   * @method Body#update
    * @protected
    */
-  preUpdate(time, delta) {
+  update(time, delta) {
     if (!this.enable) { return; }
 
     this.phase = 1;

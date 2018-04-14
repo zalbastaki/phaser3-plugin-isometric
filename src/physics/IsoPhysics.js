@@ -3,8 +3,9 @@ import Cube from '../Cube';
 import Point3 from '../Point3';
 import Octree from '../Octree';
 import { ISOSPRITE } from '../IsoSprite';
+import { TYPE as ISOBODYTYPE } from './Body';
 
-const { GROUP, GameObjects } = Phaser;
+const { GROUP, GameObjects, Structs } = Phaser;
 
 /**
  * IsoPhysics Physics constructor.
@@ -22,6 +23,15 @@ export default class IsoPhysics {
      * @property {Phaser.Scene} scene - Local reference to scene.
      */
     this.scene = scene;
+
+    /**
+     * Bodies
+     *
+     * @name World#bodies
+     * @type {Phaser.Structs.Set.<Body>}
+     * @since 3.0.0
+     */
+    this.bodies = new Structs.Set();
 
     /**
      * @property {Projector} projector - Local reference to the current projector.
@@ -81,7 +91,16 @@ export default class IsoPhysics {
     /**
      * @property {Octree} octree - The world Octree.
      */
-    this.octree = new Octree(this.bounds.x, this.bounds.y, this.bounds.z, this.bounds.widthX, this.bounds.widthY, this.bounds.height, this.maxObjects, this.maxLevels);
+    this.octree = new Octree(
+      this.bounds.x,
+      this.bounds.y,
+      this.bounds.z,
+      this.bounds.widthX,
+      this.bounds.widthY,
+      this.bounds.height,
+      this.maxObjects,
+      this.maxLevels
+    );
 
     //  Avoid gc spikes by caching these values for re-use
 
@@ -173,7 +192,7 @@ export default class IsoPhysics {
   /**
    * Updates the size of this physics world.
    *
-   * @method Arcade#setBounds
+   * @method IsoPhysics#setBounds
    * @param {number} x - Bottom rear most corner of the world.
    * @param {number} y - Bottom rear most corner of the world.
    * @param {number} z - Bottom rear most corner of the world.
@@ -188,7 +207,7 @@ export default class IsoPhysics {
   /**
    * Updates the size of this physics world to match the size of the game world.
    *
-   * @method Arcade#setBoundsToWorld
+   * @method IsoPhysics#setBoundsToWorld
    */
   setBoundsToWorld() {
     const { width, height } = this.scene.sys.game.config;
@@ -199,7 +218,7 @@ export default class IsoPhysics {
    * This will create an IsoPhysics Physics body on the given game object or array of game objects.
    * A game object can only have 1 physics body active at any one time, and it can't be changed until the object is destroyed.
    *
-   * @method Arcade#enable
+   * @method IsoPhysics#enable
    * @param {object|array|Phaser.Group} object - The game object to create the physics body on. Can also be an array or Group of objects, a body will be created on every child that has a `body` property.
    * @param {boolean} [children=true] - Should a body be created on all children of this object? If true it will recurse down the display list as far as it can go.
    */
@@ -221,16 +240,14 @@ export default class IsoPhysics {
           }
         }
       }
+    } else if (object instanceof GameObjects.Group) {
+      //  If it's a Group then we do it on the children regardless
+      this.enable(object.children, children);
     } else {
-      if (object instanceof GameObjects.Group) {
-        //  If it's a Group then we do it on the children regardless
-        this.enable(object.children, children);
-      } else {
-        this.enableBody(object);
+      this.enableBody(object);
 
-        if (children && object.hasOwnProperty('children') && object.children.length > 0) {
-          this.enable(object.children, true);
-        }
+      if (children && object.hasOwnProperty('children') && object.children.length > 0) {
+        this.enable(object.children, true);
       }
     }
   }
@@ -239,19 +256,22 @@ export default class IsoPhysics {
    * Creates an IsoPhysics Physics body on the given game object.
    * A game object can only have 1 physics body active at any one time, and it can't be changed until the body is nulled.
    *
-   * @method Arcade#enableBody
+   * @method IsoPhysics#enableBody
    * @param {object} object - The game object to create the physics body on. A body will only be created if this object has a null `body` property.
    */
   enableBody(object) {
-    if (object.hasOwnProperty('body') && object.body === null) {
+    if (object.body === null) {
       object.body = new Body(object);
+      this.bodies.set(object.body);
     }
+
+    return object;
   }
 
   /**
    * Called automatically by a Physics body, it updates all motion related values on the Body.
    *
-   * @method Arcade#updateMotion
+   * @method IsoPhysics#updateMotion
    * @param {Body} body - The Body object to be updated.
    */
   updateMotion(body, delta) {
@@ -268,7 +288,7 @@ export default class IsoPhysics {
    * A tween-like function that takes a starting velocity and some other factors and returns an altered velocity.
    * Based on a function in Flixel by @ADAMATOMIC
    *
-   * @method Arcade#computeVelocity
+   * @method IsoPhysics#computeVelocity
    * @param {number} axis - 0 for nothing, 1 for X-axis, 2 for Y-axis, 3 for vertical (Z-axis).
    * @param {Body} body - The Body object to be updated.
    * @param {number} velocity - Any component of velocity (e.g. 20).
@@ -318,7 +338,7 @@ export default class IsoPhysics {
    * The second parameter can be an array of objects, of differing types.
    * NOTE: This function is not recursive, and will not test against children of objects passed (i.e. Groups within Groups).
    *
-   * @method Arcade#overlap
+   * @method IsoPhysics#overlap
    * @param {IsoSprite|Phaser.Group} object1 - The first object to check. Can be an instance of IsoSprite or Phaser.Group.
    * @param {IsoSprite|Phaser.Group|array} object2 - The second object or array of objects to check. Can be IsoSprite or Phaser.Group.
    * @param {function} [overlapCallback=null] - An optional callback function that is called if the objects overlap. The two objects will be passed to this function in the same order in which you specified them.
@@ -354,7 +374,7 @@ export default class IsoPhysics {
    * The collideCallback is an optional function that is only called if two sprites collide. If a processCallback has been set then it needs to return true for collideCallback to be called.
    * NOTE: This function is not recursive, and will not test against children of objects passed (i.e. Groups within Groups).
    *
-   * @method Arcade#collide
+   * @method IsoPhysics#collide
    * @param {IsoSprite|Phaser.Group} object1 - The first object to check. Can be an instance of IsoSprite or Phaser.Group.
    * @param {IsoSprite|Phaser.Group|array} object2 - The second object or array of objects to check. Can be IsoSprite or Phaser.Group.
    * @param {function} [collideCallback=null] - An optional callback function that is called if the objects collide. The two objects will be passed to this function in the same order in which you specified them, unless you are colliding Group vs. Sprite, in which case Sprite will always be the first parameter.
@@ -385,7 +405,7 @@ export default class IsoPhysics {
   /**
    * Internal collision handler.
    *
-   * @method Arcade#collideHandler
+   * @method IsoPhysics#collideHandler
    * @private
    * @param {IsoSprite|Phaser.Group} object1 - The first object to check. Can be an instance of IsoSprite or Phaser.Group.
    * @param {IsoSprite|Phaser.Group} object2 - The second object to check. Can be an instance of IsoSprite or Phaser.Group. Can also be an array of objects to check.
@@ -402,6 +422,10 @@ export default class IsoPhysics {
     }
 
     if (object1 && object2) {
+      // BODIES
+      if (object1.type === ISOBODYTYPE && object2.type === ISOBODYTYPE) {
+        this.collideBodyVsBody(object1, object2, collideCallback, processCallback, callbackContext, overlapOnly);
+      }
       //  ISOSPRITES
       if (object1.type === ISOSPRITE) {
         if (object2.type === ISOSPRITE) {
@@ -422,9 +446,34 @@ export default class IsoPhysics {
   }
 
   /**
-   * An internal function. Use Arcade.collide instead.
+   * An internal function. Use IsoPhysics.collide instead.
    *
-   * @method Arcade#collideSpriteVsSprite
+   * @method IsoPhysics#collideBodyVsBody
+   * @private
+   * @param {IsoSprite} sprite1 - The first sprite to check.
+   * @param {IsoSprite} sprite2 - The second sprite to check.
+   * @param {function} collideCallback - An optional callback function that is called if the objects collide. The two objects will be passed to this function in the same order in which you specified them.
+   * @param {function} processCallback - A callback function that lets you perform additional checks against the two objects if they overlap. If this is set then collision will only happen if processCallback returns true. The two objects will be passed to this function in the same order in which you specified them.
+   * @param {object} callbackContext - The context in which to run the callbacks.
+   * @param {boolean} overlapOnly - Just run an overlap or a full collision.
+   * @return {boolean} True if there was a collision, otherwise false.
+   */
+  collideBodyVsBody(body1, body2, collideCallback, processCallback, callbackContext, overlapOnly) {
+    if (this.separate(body1, body2, processCallback, callbackContext, overlapOnly)) {
+      if (collideCallback) {
+        collideCallback.call(callbackContext, body1, body2);
+      }
+
+      this._total++;
+    }
+
+    return true;
+  }
+
+  /**
+   * An internal function. Use IsoPhysics.collide instead.
+   *
+   * @method IsoPhysics#collideSpriteVsSprite
    * @private
    * @param {IsoSprite} sprite1 - The first sprite to check.
    * @param {IsoSprite} sprite2 - The second sprite to check.
@@ -451,9 +500,9 @@ export default class IsoPhysics {
   }
 
   /**
-   * An internal function. Use Arcade.collide instead.
+   * An internal function. Use IsoPhysics.collide instead.
    *
-   * @method Arcade#collideSpriteVsGroup
+   * @method IsoPhysics#collideSpriteVsGroup
    * @private
    * @param {IsoSprite} sprite - The sprite to check.
    * @param {Phaser.Group} group - The Group to check.
@@ -499,9 +548,9 @@ export default class IsoPhysics {
   }
 
   /**
-   * An internal function. Use Arcade.collide instead.
+   * An internal function. Use IsoPhysics.collide instead.
    *
-   * @method Arcade#collideGroupVsSelf
+   * @method IsoPhysics#collideGroupVsSelf
    * @private
    * @param {Phaser.Group} group - The Group to check.
    * @param {function} collideCallback - An optional callback function that is called if the objects collide. The two objects will be passed to this function in the same order in which you specified them.
@@ -527,9 +576,9 @@ export default class IsoPhysics {
   }
 
   /**
-   * An internal function. Use Arcade.collide instead.
+   * An internal function. Use IsoPhysics.collide instead.
    *
-   * @method Arcade#collideGroupVsGroup
+   * @method IsoPhysics#collideGroupVsGroup
    * @private
    * @param {Phaser.Group} group1 - The first Group to check.
    * @param {Phaser.Group} group2 - The second Group to check.
@@ -552,7 +601,7 @@ export default class IsoPhysics {
    * The core separation function to separate two physics bodies.
    *
    * @private
-   * @method Arcade#separate
+   * @method IsoPhysics#separate
    * @param {Body} body1 - The first Body object to separate.
    * @param {Body} body2 - The second Body object to separate.
    * @param {function} [processCallback=null] - A callback function that lets you perform additional checks against the two objects if they overlap. If this function is set then the sprites will only be collided if it returns true.
@@ -589,7 +638,7 @@ export default class IsoPhysics {
   /**
    * Check for intersection against two bodies.
    *
-   * @method Arcade#intersects
+   * @method IsoPhysics#intersects
    * @param {Body} body1 - The Body object to check.
    * @param {Body} body2 - The Body object to check.
    * @return {boolean} True if they intersect, otherwise false.
@@ -626,7 +675,7 @@ export default class IsoPhysics {
    * The core separation function to separate two physics bodies on the x axis.
    *
    * @private
-   * @method Arcade#separateX
+   * @method IsoPhysics#separateX
    * @param {Body} body1 - The Body object to separate.
    * @param {Body} body2 - The Body object to separate.
    * @param {boolean} overlapOnly - If true the bodies will only have their overlap data set, no separation or exchange of velocity will take place.
@@ -719,7 +768,7 @@ export default class IsoPhysics {
    * The core separation function to separate two physics bodies on the x axis.
    *
    * @private
-   * @method Arcade#separateY
+   * @method IsoPhysics#separateY
    * @param {Body} body1 - The Body object to separate.
    * @param {Body} body2 - The Body object to separate.
    * @param {boolean} overlapOnly - If true the bodies will only have their overlap data set, no separation or exchange of velocity will take place.
@@ -812,7 +861,7 @@ export default class IsoPhysics {
    * The core separation function to separate two physics bodies on the z axis.
    *
    * @private
-   * @method Arcade#separateZ
+   * @method IsoPhysics#separateZ
    * @param {Body} body1 - The Body object to separate.
    * @param {Body} body2 - The Body object to separate.
    * @param {boolean} overlapOnly - If true the bodies will only have their overlap data set, no separation or exchange of velocity will take place.
@@ -917,7 +966,7 @@ export default class IsoPhysics {
   /**
    * Find the distance between two display objects (like Sprites).
    *
-   * @method Isometric.Arcade#distanceBetween
+   * @method Isometric.IsoPhysics#distanceBetween
    * @param {any} source - The Display Object to test from.
    * @param {any} target - The Display Object to test to.
    * @return {number} The distance between the source and target objects.
@@ -935,7 +984,7 @@ export default class IsoPhysics {
    * The calculation is made from the display objects x/y coordinate. This may be the top-left if its anchor hasn't been changed.
    * If you need to calculate from the center of a display object instead use the method distanceBetweenCenters()
    *
-   * @method Arcade#distanceToXY
+   * @method IsoPhysics#distanceToXY
    * @param {any} displayObject - The Display Object to test from.
    * @param {number} x - The x coordinate to test to.
    * @param {number} y - The y coordinate to test to.
@@ -953,7 +1002,7 @@ export default class IsoPhysics {
    * The calculation is made from the display objects x/y/z coordinate. This may be the top-left if its anchor hasn't been changed.
    * If you need to calculate from the center of a display object instead use the method distanceBetweenCenters()
    *
-   * @method Arcade#distanceToXYZ
+   * @method IsoPhysics#distanceToXYZ
    * @param {any} displayObjectBody - The Display Object to test from.
    * @param {number} x - The x coordinate to test to.
    * @param {number} y - The y coordinate to test to.
@@ -974,7 +1023,7 @@ export default class IsoPhysics {
    * If you need to calculate from the center of a display object instead use the method distanceBetweenCenters()
    * The distance to the Pointer is returned in isometric distance.
    *
-   * @method Phaser.Physics.Arcade#distanceToPointer
+   * @method Phaser.Physics.IsoPhysics#distanceToPointer
    * @param {any} displayObjectBody - The Display Object to test from.
    * @param {Phaser.Pointer} [pointer] - The Phaser.Pointer to test to. If none is given then Input.activePointer is used.
    * @return {number} The distance between the object and the Pointer.
@@ -991,7 +1040,7 @@ export default class IsoPhysics {
   /**
    * Find the angles in radians between a display object (like a IsoSprite) and the given x/y/z coordinate.
    *
-   * @method Phaser.Physics.Isometric.Isometric.Arcade#anglesToXYZ
+   * @method Phaser.Physics.Isometric.Isometric.IsoPhysics#anglesToXYZ
    * @param {any} displayObjectBody - The Display Object to test from.
    * @param {number} x - The x coordinate to get the angle to.
    * @param {number} y - The y coordinate to get the angle to.
@@ -1011,7 +1060,7 @@ export default class IsoPhysics {
    * Find the angle in radians between a display object (like a Sprite) and a Pointer, taking their x/y and center into account.
    * This is not the visual angle but the angle in the isometric co-ordinate system.
    *
-   * @method Phaser.Physics.Isometric.Arcade#angleToPointer
+   * @method Phaser.Physics.Isometric.IsoPhysics#angleToPointer
    * @param {any} displayObjectBody - The Display Object to test from.
    * @param {Phaser.Pointer} [pointer] - The Phaser.Pointer to test to. If none is given then Input.activePointer is used.
    * @return {number} The (isometric) angle in radians between displayObjectBody.x/y to Pointer.x/y.
@@ -1029,7 +1078,7 @@ export default class IsoPhysics {
    * Given the angle (in degrees) and speed calculate the velocity and return it as a Point object, or set it to the given point object.
    * One way to use this is: velocityFromAngle(angle, 200, sprite.velocity) which will set the values directly to the sprites velocity and not create a new Point object.
    *
-   * @method Phaser.Physics.Arcade#velocityFromAngle
+   * @method Phaser.Physics.IsoPhysics#velocityFromAngle
    * @param {number} theta - The angle in radians for x,y in the isometric co-ordinate system
    * @param {number} [phi=Math.PI/2] - The angle in radians for z in the isometric co-ordinate system
    * @param {number} [speed=60] - The speed it will move, in pixels per second sq.
@@ -1053,7 +1102,7 @@ export default class IsoPhysics {
    * Note: The display object does not continuously track the target. If the target changes location during transit the display object will not modify its course.
    * Note: The display object doesn't stop moving once it reaches the destination coordinates.
    *
-   * @method Phaser.Physics.Isometric.Arcade#accelerateToXYZ
+   * @method Phaser.Physics.Isometric.IsoPhysics#accelerateToXYZ
    * @param {any} displayObject - The display object to move.
    * @param {number} x - The x coordinate to accelerate towards.
    * @param {number} y - The y coordinate to accelerate towards.
@@ -1087,7 +1136,7 @@ export default class IsoPhysics {
    * Note: The display object doesn't stop moving once it reaches the destination coordinates.
    * Note: Doesn't take into account acceleration, maxVelocity or drag (if you've set drag or acceleration too high this object may not move at all)
    *
-   * @method Phaser.Physics.Isometric.Arcade#moveToXYZ
+   * @method Phaser.Physics.Isometric.IsoPhysics#moveToXYZ
    * @param {any} displayObject - The display object to move, must have an isoArcade body.
    * @param {number} x - The x coordinate to move towards.
    * @param {number} y - The y coordinate to move towards.
@@ -1124,7 +1173,7 @@ export default class IsoPhysics {
    * Note: The display object doesn't stop moving once it reaches the destination coordinates.
    * Note: Doesn't take into account acceleration, maxVelocity or drag (if you've set drag or acceleration too high this object may not move at all)
    *
-   * @method Phaser.Physics.Isometric.Arcade#moveToObject
+   * @method Phaser.Physics.Isometric.IsoPhysics#moveToObject
    * @param {any} displayObject - The display object to move.
    * @param {any} destination - The display object to move towards. Can be any object but must have visible x/y/z properties.
    * @param {number} [speed=60] - The speed it will move, in pixels per second (default is 60 pixels/sec)
@@ -1142,7 +1191,7 @@ export default class IsoPhysics {
    * Note: The display object does not continuously track the target. If the target changes location during transit the display object will not modify its course.
    * Note: The display object doesn't stop moving once it reaches the destination coordinates.
    *
-   * @method Phaser.Physics.Isometric.Arcade#moveToPointer
+   * @method Phaser.Physics.Isometric.IsoPhysics#moveToPointer
    * @param {any} displayObject - The display object to move.
    * @param {number} [speed=60] - The speed it will move, in pixels per second (default is 60 pixels/sec)
    * @param {Phaser.Pointer} [pointer] - The pointer to move towards. Defaults to Phaser.Input.activePointer.
@@ -1174,37 +1223,35 @@ export default class IsoPhysics {
     return a.theta;
   }
 
-  preUpdate(time, delta) {
-    const children = this.scene.children.list;
-    const len = children.length;
+  update(time, delta) {
+    const bodies = this.bodies.entries;
+    const len = bodies.length;
+    let i;
 
-    for (var i = 0; i < len; i++) {
-      const child = children[i];
-      if (!child.body) { return; }
-
-      child.body.preUpdate(time, delta);
+    for (i = 0; i < len; i++) {
+      const body = bodies[i];
+      body.update(time, delta);
     }
   }
 
   postUpdate() {
-    const children = this.scene.children.list;
-    const len = children.length;
+    const bodies = this.bodies.entries;
+    const len = bodies.length;
+    let i;
 
-    for (var i = 0; i < len; i++) {
-      const child = children[i];
-      if (!child.body) { return; }
+    for (i = 0; i < len; i++) {
+      const body = bodies[i];
 
-      const others = Object.assign([], children);
-      others.splice(i, 1);
-      this.collide(child, others);
-      child.body.postUpdate();
+      const others = this.bodies.difference(new Structs.Set([body]));
+      this.collide(body, others.entries);
+      body.postUpdate();
     }
   }
 
   boot() {
     const eventEmitter = this.scene.sys.events;
 
-    eventEmitter.on('preupdate', this.preUpdate, this);
+    eventEmitter.on('update', this.update, this);
     eventEmitter.on('postupdate', this.postUpdate, this);
   }
 
@@ -1229,7 +1276,7 @@ export default class IsoPhysics {
 //
 //     return function (system) {
 //         if (system === ISOARCADE && this.isoArcade === null) {
-//             this.isoArcade = new Arcade(this.game);
+//             this.isoArcade = new IsoPhysics(this.game);
 //             this.setBoundsToWorld();
 //         }
 //         return _super.call(this, system);
