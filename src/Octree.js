@@ -106,7 +106,12 @@ class Octree {
    * @param {Phaser.Group} group - The Group to add to the octree.
    */
   populate(group) {
-    group.forEach(this.populateHandler, this, true);
+    const len = group.children.size;
+    const children = group.children.entries;
+
+    for(let i = 0; i < len; i++) {
+      this.populateHandler(children[i]);
+    }
   }
 
   /**
@@ -116,7 +121,7 @@ class Octree {
    * @param {IsoSprite|object} sprite - The Sprite to check.
    */
   populateHandler(sprite) {
-    if (sprite.body && sprite.exists) {
+    if (sprite.body) {
       this.insert(sprite.body);
     }
   }

@@ -360,7 +360,7 @@ export default class Body {
     this.phase = 0;
 
     /**
-     * @property {boolean} skipTree - If true and you collide this IsoSprite against a Group, it will disable the collision check from using a QuadTree/Octree.
+     * @property {boolean} skipTree - If true and you collide this IsoSprite against a Group, it will disable the collision check from using an Octree.
      */
     this.skipTree = false;
 
@@ -496,8 +496,10 @@ export default class Body {
     }
 
     if (this.moves) {
+      const pluginKey = this.scene.sys.settings.map.isoPhysics;
+      const { world } = this.scene[pluginKey];
       delta /= 1000;
-      this.scene.isoPhysics.updateMotion(this, delta);
+      world.updateMotion(this, delta);
 
       this.newVelocity.set(this.velocity.x * delta, this.velocity.y * delta, this.velocity.z * delta);
 
@@ -517,7 +519,7 @@ export default class Body {
         this.checkWorldBounds();
       }
 
-      if (this.sprite.outOfBoundsKill && !this.scene.isoPhysics.bounds.intersects(this.sprite.isoBounds)){
+      if (this.sprite.outOfBoundsKill && !world.bounds.intersects(this.sprite.isoBounds)){
         this.sprite.kill();
       }
     }
@@ -631,32 +633,35 @@ export default class Body {
    * @protected
    */
   checkWorldBounds() {
-    if (this.position.x < this.scene.isoPhysics.bounds.x && this.scene.isoPhysics.checkCollision.backX) {
-      this.position.x = this.scene.isoPhysics.bounds.x;
+    const pluginKey = this.scene.sys.settings.map.isoPhysics;
+    const { world } = this.scene[pluginKey];
+
+    if (this.position.x < world.bounds.x && world.checkCollision.backX) {
+      this.position.x = world.bounds.x;
       this.velocity.x *= -this.bounce.x;
       this.blocked.backX = true;
-    } else if (this.frontX > this.scene.isoPhysics.bounds.frontX && this.scene.isoPhysics.checkCollision.frontX) {
-      this.position.x = this.scene.isoPhysics.bounds.frontX - this.widthX;
+    } else if (this.frontX > world.bounds.frontX && world.checkCollision.frontX) {
+      this.position.x = world.bounds.frontX - this.widthX;
       this.velocity.x *= -this.bounce.x;
       this.blocked.frontX = true;
     }
 
-    if (this.position.y < this.scene.isoPhysics.bounds.y && this.scene.isoPhysics.checkCollision.backY) {
-      this.position.y = this.scene.isoPhysics.bounds.y;
+    if (this.position.y < world.bounds.y && world.checkCollision.backY) {
+      this.position.y = world.bounds.y;
       this.velocity.y *= -this.bounce.y;
       this.blocked.backY = true;
-    } else if (this.frontY > this.scene.isoPhysics.bounds.frontY && this.scene.isoPhysics.checkCollision.frontY) {
-      this.position.y = this.scene.isoPhysics.bounds.frontY - this.widthY;
+    } else if (this.frontY > world.bounds.frontY && world.checkCollision.frontY) {
+      this.position.y = world.bounds.frontY - this.widthY;
       this.velocity.y *= -this.bounce.y;
       this.blocked.frontY = true;
     }
 
-    if (this.position.z < this.scene.isoPhysics.bounds.z && this.scene.isoPhysics.checkCollision.down) {
-      this.position.z = this.scene.isoPhysics.bounds.z;
+    if (this.position.z < world.bounds.z && world.checkCollision.down) {
+      this.position.z = world.bounds.z;
       this.velocity.z *= -this.bounce.z;
       this.blocked.down = true;
-    } else if (this.top > this.scene.isoPhysics.bounds.top && this.scene.isoPhysics.checkCollision.up) {
-      this.position.z = this.scene.isoPhysics.bounds.top - this.height;
+    } else if (this.top > world.bounds.top && world.checkCollision.up) {
+      this.position.z = world.bounds.top - this.height;
       this.velocity.z *= -this.bounce.z;
       this.blocked.up = true;
     }
@@ -951,11 +956,14 @@ export default class Body {
     var posX = -this.scene.cameras.main.x;
     var posY = -this.scene.cameras.main.y;
 
+    const pluginKey = this.scene.sys.settings.map.isoPlugin;
+    const projector = this.scene[pluginKey].projector;
+
     if (filled) {
       points = [corners[1], corners[3], corners[2], corners[6], corners[4], corners[5], corners[1]];
 
       points = points.map(p => {
-        var newPos = this.scene.iso.projector.project(p);
+        var newPos = projector.project(p);
         newPos.x += posX;
         newPos.y += posY;
         return newPos;
@@ -973,7 +981,7 @@ export default class Body {
     } else {
       points = corners.slice(0, corners.length);
       points = points.map(p => {
-        var newPos = this.scene.iso.projector.project(p);
+        var newPos = projector.project(p);
         newPos.x += posX;
         newPos.y += posY;
         return newPos;

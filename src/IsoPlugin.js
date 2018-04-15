@@ -85,7 +85,7 @@ export default class IsoPlugin {
      * @param {Phaser.Group} [group] - Optional Group to add the object to. If not specified it will be added to the World group.
      * @returns {IsoSprite} the newly created IsoSprite object.
      */
-    Phaser.GameObjects.GameObjectFactory.register('isoSprite', function (x, y, z, key, frame = 0, group) {
+    Phaser.GameObjects.GameObjectFactory.register('isoSprite', function (x, y, z, key, group, frame = 0) {
       const sprite = new IsoSprite(this.scene, x, y, z, key, frame);
 
       if (typeof group === 'undefined') {

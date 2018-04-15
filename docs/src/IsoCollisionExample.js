@@ -21,14 +21,21 @@ class IsoCollisionExample extends Scene {
     this.sys.install('IsoPlugin');
     this.sys.install('IsoPhysics');
 
+    this.isoGroup = this.add.group();
+
     // Apply some gravity on our cubes
-    this.isoPhysics.gravity.setTo(0, 0, -500);
+    this.isoPhysics.world.gravity.setTo(0, 0, -500);
+
+    this.isoPhysics.projector.origin.setTo(0.5, 0.3);
 
     // Add some first cubes to our scene
     this.spawnCubes();
   }
 
   update() {
+    // Collide cubes against each other
+    this.isoPhysics.world.collide(this.isoGroup);
+
     // Moooore cuuuubes
     if (this.input.activePointer.justDown) {
       this.spawnCubes();
@@ -36,14 +43,14 @@ class IsoCollisionExample extends Scene {
   }
 
   spawnCubes() {
-    var cube;
-    for (var xx = 256; xx > 0; xx -= 64) {
-      for (var yy = 256; yy > 0; yy -= 64) {
+    let cube;
+    for (let xx = 256; xx > 0; xx -= 64) {
+      for (let yy = 256; yy > 0; yy -= 64) {
         // Add a cube which is way above the ground
-        cube = this.add.isoSprite(xx, yy, 600, 'cube');
+        cube = this.add.isoSprite(xx, yy, 600, 'cube', this.isoGroup);
 
         // Enable the physics body on this cube
-        this.isoPhysics.enable(cube);
+        this.isoPhysics.world.enable(cube);
 
         // Collide with the world bounds so it doesn't go falling forever or fly off the screen!
         cube.body.collideWorldBounds = true;
@@ -62,7 +69,7 @@ class IsoCollisionExample extends Scene {
 
 let config = {
   type: Phaser.AUTO,
-  width: 600,
+  width: 800,
   height: 600,
   pixelArt: true,
   scene: IsoCollisionExample
