@@ -12,16 +12,15 @@ class IsoProjectionExample extends Scene {
   preload() {
     this.load.image('cube', '../dist/assets/cube.png');
     this.load.scenePlugin({
-      key: "IsoPlugin",
+      key: 'IsoPlugin',
       url: IsoPlugin,
-      sceneKey: "iso"
+      sceneKey: 'iso'
     });
   }
 
   create() {
-
-    // Set the anchor of the isometric projection to the mid top of the screen
-    this.iso.projector.anchor.setTo(0.5, 0.1);
+    // Set the origin of the isometric projection to the mid top of the screen
+    this.iso.projector.origin.setTo(0.5, 0.1);
 
     // Even though the children are added back to front, it is sorted the right way
     // because depth value is set on the IsoSprites and Phaser 3 sorts after that by default.

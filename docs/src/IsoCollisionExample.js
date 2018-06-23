@@ -13,14 +13,20 @@ class IsoCollisionExample extends Scene {
 
   preload() {
     this.load.image('cube', '../dist/assets/cube.png');
-    this.load.plugin('IsoPlugin', IsoPlugin);
-    this.load.plugin('IsoPhysics', IsoPhysics);
+    this.load.scenePlugin({
+      key: 'IsoPlugin',
+      url: IsoPlugin,
+      sceneKey: 'iso'
+    });
+
+    this.load.scenePlugin({
+      key: 'IsoPhysics',
+      url: IsoPhysics,
+      sceneKey: 'isoPhysics'
+    });
   }
 
   create() {
-    this.sys.install('IsoPlugin');
-    this.sys.install('IsoPhysics');
-
     this.isoGroup = this.add.group();
 
     // Apply some gravity on our cubes
