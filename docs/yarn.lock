@@ -4279,9 +4279,10 @@ phaser3-plugin-isometric@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/phaser3-plugin-isometric/-/phaser3-plugin-isometric-0.0.6.tgz#e504827261b7d5df4cc8164f43e8a56e260574d8"
 
-phaser@^3.12.x:
-  version "3.12.0"
-  resolved "https://registry.yarnpkg.com/phaser/-/phaser-3.12.0.tgz#7cc14480694b0bad13f1f6ede584ea8371a055da"
+phaser@^3.x:
+  version "3.15.1"
+  resolved "https://registry.yarnpkg.com/phaser/-/phaser-3.15.1.tgz#17d41fb5b310fb062952e29d9bb26a99c90d3a44"
+  integrity sha512-K2IaBziSW6OFyIkIFyJgBSi+kL1yip3gbL6TBsjzesJqLxP3o5+NwfPf6fqrQ4yxBYbbuKP2da5lsh5LFw7jXA==
   dependencies:
     eventemitter3 "^3.1.0"
 
